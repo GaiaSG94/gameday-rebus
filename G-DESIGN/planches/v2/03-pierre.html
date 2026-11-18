@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rébus — V2 · 03 Pierre</title>
+<style>
+/* ---------- planche ---------- */
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:#e9e6df;overflow-x:hidden}
+body{font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;color:#111}
+.board{width:2010px;padding:56px 64px 64px;transform-origin:0 0}
+.b-head{display:grid;grid-template-columns:1fr auto;align-items:end;gap:40px;margin-bottom:36px;border-bottom:1px solid #111;padding-bottom:20px}
+.b-head h1{font-size:44px;font-weight:800;letter-spacing:-.03em}
+.b-head h1 small{font-size:15px;font-weight:500;letter-spacing:.02em;color:#6b665c;margin-left:14px}
+.b-head p{font-size:15px;line-height:1.5;color:#3a372f;max-width:760px;margin-top:8px}
+.swatches{display:flex;gap:10px}
+.sw{width:118px;font-size:12px;color:#3a372f}
+.sw i{display:block;height:44px;border-radius:6px;border:1px solid rgba(0,0,0,.15);margin-bottom:6px}
+.frames{display:flex;gap:56px;align-items:flex-start}
+.cap{font-size:12px;letter-spacing:.08em;text-transform:lowercase;color:#6b665c;margin-bottom:10px}
+.strip{margin-top:44px;display:grid;grid-template-columns:repeat(5,1fr);gap:20px}
+.state{background:#faf7f0;border:1px solid #d9d4c8;border-radius:10px;padding:18px 18px 16px}
+.state h3{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:lowercase;color:#6b665c;margin-bottom:14px}
+
+/* ---------- cadre neutre (chrome du feed, volontairement gris) ---------- */
+.desk{width:1440px;height:900px;background:#f2f2f1;border-radius:10px;overflow:hidden;box-shadow:0 30px 60px -30px rgba(0,0,0,.35);position:relative}
+.d-top{height:56px;background:#fff;border-bottom:1px solid #e3e3e1;display:flex;align-items:center;padding:0 20px;gap:20px}
+.d-top .logo{width:96px;height:22px;border-radius:5px;background:#dcdcda}
+.d-top .search{flex:0 0 560px;height:38px;border-radius:19px;background:#ececea;margin:0 auto}
+.d-top .av{width:32px;height:32px;border-radius:50%;background:#dcdcda}
+.d-body{display:grid;grid-template-columns:272px 756px 316px;gap:24px;padding:20px 24px 0 24px;justify-content:center}
+.rail i{display:block;height:12px;border-radius:6px;background:#e1e1df;margin:14px 0 22px}
+.rail i:nth-child(2n){width:70%}.rail i:nth-child(3n){width:52%}
+.side{background:#fff;border-radius:12px;height:300px;padding:18px}
+.side i{display:block;height:10px;border-radius:5px;background:#e8e8e6;margin-bottom:14px}
+.side i:first-child{width:50%;height:14px}
+.post{background:#fff;border-radius:12px;padding:14px 16px 10px}
+.p-head{display:flex;align-items:center;gap:8px;font-size:12px;color:#55554f}
+.p-head .pav{width:24px;height:24px;border-radius:50%;background:#d6d6d3}
+.p-head b{color:#1f1f1c;font-weight:600}
+.p-title{font-size:19px;font-weight:600;color:#1f1f1c;margin:8px 0 12px;letter-spacing:-.005em}
+.p-act{display:flex;gap:8px;margin-top:10px}
+.p-act span{font-size:12px;font-weight:600;color:#3d3d39;background:#ececea;border-radius:16px;padding:7px 13px}
+.slot-desk{width:724px;height:568px;border-radius:12px;overflow:hidden}
+.mob{width:390px;height:844px;border-radius:46px;background:#fff;overflow:hidden;box-shadow:0 30px 60px -30px rgba(0,0,0,.35),0 0 0 10px #1b1b1b;position:relative}
+.m-status{height:46px;display:flex;justify-content:space-between;align-items:flex-end;padding:0 30px 6px;font-size:14px;font-weight:600}
+.m-status i{width:66px;height:12px;border-radius:6px;background:#1b1b1b;display:block;margin-bottom:3px}
+.m-bar{height:48px;display:flex;align-items:center;gap:12px;padding:0 14px;border-bottom:1px solid #ececea}
+.m-bar .search{flex:1;height:34px;border-radius:17px;background:#ececea}
+.m-bar .av{width:30px;height:30px;border-radius:50%;background:#dcdcda}
+.m-post{padding:12px 14px 0}
+.m-post .p-title{font-size:16px;margin:6px 0 10px}
+.slot-mob{width:390px;height:604px;margin-left:-14px;overflow:hidden}
+.m-post .p-act{margin-top:8px}
+
+html,body{background:#e2ded7}
+.state{background:#100e0c;border-color:#100e0c;color:#e9dfd2}
+.state h3{color:#7d746a}
+
+/* =========================================================
+   JEU — V2 · 03 « Pierre »
+   basalte #0f0d0b · pierre #77716a · os #e9dfd2 · braise #ff6a1a
+   ========================================================= */
+.game{container-type:inline-size;position:relative;width:100%;height:100%;color:#e9dfd2;overflow:hidden;display:flex;flex-direction:column;
+  background:radial-gradient(90% 60% at 50% 34%,#2a2420 0%,#151210 55%,#0b0a09 100%)}
+.scene{position:relative;height:330px;flex:none}
+.dust{position:absolute;inset:0;opacity:.7;background:
+  radial-gradient(1.2px 1.2px at 12% 22%,#e9dfd2 50%,transparent),radial-gradient(1px 1px at 28% 64%,#e9dfd2 50%,transparent),
+  radial-gradient(1.4px 1.4px at 71% 18%,#e9dfd2 50%,transparent),radial-gradient(1px 1px at 86% 58%,#e9dfd2 50%,transparent),
+  radial-gradient(1px 1px at 54% 80%,#e9dfd2 50%,transparent),radial-gradient(1.6px 1.6px at 40% 12%,#ffb27a 50%,transparent),
+  radial-gradient(1px 1px at 92% 30%,#e9dfd2 50%,transparent),radial-gradient(1.2px 1.2px at 6% 74%,#ffb27a 50%,transparent)}
+.hud{position:absolute;top:16px;left:18px;right:18px;display:flex;justify-content:space-between;align-items:baseline;z-index:4}
+.wm{font-size:13px;font-weight:600;letter-spacing:.42em;text-transform:uppercase;color:#cdbfae}
+.meta{display:flex;gap:12px;font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:10.5px;color:#7d746a}
+.meta b{color:#e9dfd2;font-weight:500}
+/* croix de lumière */
+.beamH{position:absolute;left:0;right:0;top:146px;height:2px;background:linear-gradient(90deg,transparent,#ff6a1a 20%,#ffd2b0 50%,#ff6a1a 80%,transparent);box-shadow:0 0 12px 2px rgba(255,106,26,.7),0 0 40px 6px rgba(255,106,26,.25)}
+.beamV{position:absolute;left:50%;top:40px;bottom:30px;width:2px;margin-left:-1px;background:linear-gradient(180deg,transparent,#ff6a1a 30%,#ffd2b0 50%,#ff6a1a 70%,transparent);box-shadow:0 0 12px 2px rgba(255,106,26,.7),0 0 40px 6px rgba(255,106,26,.25)}
+.flare{position:absolute;left:50%;top:147px;width:90px;height:90px;margin:-45px 0 0 -45px;border-radius:50%;background:radial-gradient(closest-side,rgba(255,220,190,.95),rgba(255,106,26,.45) 35%,transparent)}
+.tabs{position:absolute;top:66px;left:0;right:0;display:flex;justify-content:center;gap:58px;perspective:600px;z-index:2}
+.tab{width:126px;height:162px;position:relative;filter:drop-shadow(0 18px 22px rgba(0,0,0,.75))}
+.tab.l{transform:rotateY(16deg) rotateZ(-2deg)}.tab.r{transform:rotateY(-16deg) rotateZ(2deg)}
+.tab svg{width:100%;height:100%;display:block}
+.tab .num{position:absolute;bottom:12px;left:0;right:0;text-align:center;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:9px;letter-spacing:.3em;color:#2b2622;text-shadow:1px 1px 0 rgba(233,223,210,.3)}
+.rule{position:absolute;left:0;right:0;bottom:16px;text-align:center;font-size:14px;font-weight:600;color:#e9dfd2;z-index:3}
+
+.word{display:flex;justify-content:center;gap:5px;padding:0 0 4px}
+.blk{width:36px;height:46px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:800;color:#1f1b18;
+  background:linear-gradient(160deg,#8a837a 0%,#6c665f 45%,#4a4540 100%);
+  box-shadow:inset 1px 1px 0 rgba(255,245,230,.28),inset -2px -3px 0 rgba(0,0,0,.35),0 8px 12px -4px rgba(0,0,0,.8);
+  text-shadow:1px 1px 0 rgba(255,240,220,.28),-1px -1px 0 rgba(0,0,0,.4)}
+.blk.h{color:#ffe2c8;background:linear-gradient(160deg,#7a5440 0%,#4f3528 60%,#33231a 100%);
+  text-shadow:0 0 6px #ff6a1a,0 0 16px rgba(255,106,26,.8);box-shadow:inset 1px 1px 0 rgba(255,200,160,.35),inset -2px -3px 0 rgba(0,0,0,.4),0 0 18px rgba(255,106,26,.35),0 8px 12px -4px rgba(0,0,0,.8)}
+.blk.o{background:#0e0c0b;box-shadow:inset 0 3px 6px rgba(0,0,0,.9),inset 0 -1px 0 rgba(255,240,220,.08),0 1px 0 rgba(255,240,220,.06)}
+.blk.cur{box-shadow:inset 0 3px 6px rgba(0,0,0,.9),inset 0 -2px 0 #ff6a1a,0 4px 14px -2px rgba(255,106,26,.55);animation:ember 1.3s ease-in-out infinite}
+@keyframes ember{50%{box-shadow:inset 0 3px 6px rgba(0,0,0,.9),inset 0 -2px 0 rgba(255,106,26,.45),0 4px 8px -2px rgba(255,106,26,.2)}}
+
+.panel{flex:1;display:flex;flex-direction:column;padding:16px 16px 14px}
+.hintrow{display:flex;justify-content:space-between;align-items:center}
+.hint{font:inherit;font-size:13px;font-weight:700;color:#e9dfd2;background:linear-gradient(180deg,#2a2622,#1c1916);border:0;border-radius:999px;padding:9px 16px 9px 12px;cursor:pointer;
+  box-shadow:inset 0 1px 0 rgba(255,240,220,.12),0 6px 12px -4px rgba(0,0,0,.8)}
+.hint i{display:inline-block;width:8px;height:8px;border-radius:50%;background:#ff6a1a;box-shadow:0 0 8px 2px rgba(255,106,26,.7);margin-right:9px;vertical-align:1px}
+.note{font-size:12px;color:#7d746a;text-align:right;line-height:1.4}
+.note b{color:#e9dfd2;font-weight:600}
+.kb{margin-top:auto;display:flex;flex-direction:column;gap:7px}
+.row{display:flex;gap:5px;justify-content:center}
+.k{flex:1;max-width:34px;height:44px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:#d8cec1;
+  background:linear-gradient(180deg,#2b2724,#1d1a17);box-shadow:inset 0 1px 0 rgba(255,240,220,.12),inset 0 -2px 0 rgba(0,0,0,.4),0 4px 8px -3px rgba(0,0,0,.8)}
+.k.w{max-width:58px;flex:1.6;font-size:12px}
+.k.go{color:#1a0d05;background:linear-gradient(180deg,#ff8a45,#f2600f);box-shadow:inset 0 1px 0 rgba(255,230,210,.6),0 0 16px rgba(255,106,26,.45),0 4px 8px -3px rgba(0,0,0,.8)}
+@container (min-width:600px){
+  .scene{height:320px}
+  .tabs{gap:84px;top:62px}
+  .tab{width:132px;height:170px}
+  .beamH,.flare{top:146px}
+  .blk{width:42px;height:50px;font-size:28px}
+  .kb{width:470px;margin-left:auto;margin-right:auto}
+  .k{height:38px}
+  .panel{padding:14px 40px 16px}
+}
+
+/* états */
+.mini{display:flex;gap:3px;justify-content:center;padding:4px 0}
+.mini .blk{width:24px;height:32px;font-size:17px;border-radius:4px}
+.mini.x .blk{color:#3a3430;background:linear-gradient(160deg,#4a4540,#2c2825);text-shadow:none;transform:translateY(3px) rotate(-3deg)}
+.mini.x .blk:nth-child(2n){transform:translateY(5px) rotate(4deg)}
+.mini.ok .blk{color:#ffe2c8;text-shadow:0 0 6px #ff6a1a,0 0 14px rgba(255,106,26,.7)}
+.st-note{font-size:12px;color:#a49a8e;text-align:center;margin-top:12px;line-height:1.4}
+.tag{font-size:11px;font-weight:700;color:#ff8a45;text-align:center;margin-top:8px}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <filter id="stone" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency=".05" numOctaves="5" seed="11" result="n"/>
+      <feDiffuseLighting in="n" surfaceScale="2.6" diffuseConstant="1.15" lighting-color="#efe4d4" result="l"><feDistantLight azimuth="225" elevation="52"/></feDiffuseLighting>
+      <feComposite in="l" in2="SourceAlpha" operator="in" result="lc"/>
+      <feBlend in="lc" in2="SourceGraphic" mode="multiply"/>
+    </filter>
+    <linearGradient id="rim" x1="0" x2="1" y1="0" y2="0"><stop offset=".6" stop-color="#ff6a1a" stop-opacity="0"/><stop offset="1" stop-color="#ff6a1a" stop-opacity=".38"/></linearGradient>
+    <linearGradient id="riml" x1="1" x2="0" y1="0" y2="0"><stop offset=".6" stop-color="#ff6a1a" stop-opacity="0"/><stop offset="1" stop-color="#ff6a1a" stop-opacity=".38"/></linearGradient>
+    <linearGradient id="shade" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".12"/><stop offset=".5" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".45"/></linearGradient>
+    <path id="slab" d="M14 4 H112 Q122 4 122 14 L120 150 Q120 160 110 160 H16 Q6 160 6 150 L4 14 Q4 4 14 4 Z"/>
+    <path id="starP" d="M50 10 L61 39 L92 40 L67 59 L76 89 L50 71 L24 89 L33 59 L8 40 L39 39 Z"/>
+    <g id="fishP"><path d="M10 50 C24 25 58 23 72 50 C58 77 24 75 10 50 Z"/><path d="M68 50 L92 31 C88 44 88 56 92 69 Z"/></g>
+    <symbol id="tabStar" viewBox="0 0 126 164">
+      <use href="#slab" fill="#77716a" filter="url(#stone)"/>
+      <use href="#slab" fill="url(#shade)"/>
+      <use href="#slab" fill="url(#rim)"/>
+      <g transform="translate(18 26) scale(.9)">
+        <use href="#starP" fill="#e9dfd2" opacity=".32" transform="translate(1.8 1.8)" stroke="#e9dfd2" stroke-width="5" stroke-linejoin="round"/>
+        <use href="#starP" fill="#221d19" stroke="#221d19" stroke-width="5" stroke-linejoin="round"/>
+        <use href="#starP" fill="none" stroke="#000" stroke-opacity=".55" stroke-width="2" transform="translate(-1 -1)" stroke-linejoin="round"/>
+      </g>
+    </symbol>
+    <symbol id="tabFish" viewBox="0 0 126 164">
+      <use href="#slab" fill="#77716a" filter="url(#stone)"/>
+      <use href="#slab" fill="url(#shade)"/>
+      <use href="#slab" fill="url(#riml)"/>
+      <g transform="translate(16 28) scale(.92)">
+        <use href="#fishP" fill="#e9dfd2" opacity=".32" transform="translate(1.8 1.8)"/>
+        <use href="#fishP" fill="#221d19"/>
+        <circle cx="25" cy="46" r="4" fill="#77716a"/>
+        <path d="M38 37 C44 44 44 56 38 63" fill="none" stroke="#6f6962" stroke-width="2.6" stroke-linecap="round"/>
+      </g>
+    </symbol>
+  </defs>
+</svg>
+
+<template id="game">
+  <div class="game">
+    <div class="scene">
+      <div class="dust"></div>
+      <div class="hud"><span class="wm">Rébus</span><span class="meta"><span>wed nov 18</span><span>streak <b>7</b></span><span><b>01:24</b></span></span></div>
+      <div class="beamH"></div><div class="beamV"></div><div class="flare"></div>
+      <div class="tabs">
+        <div class="tab l"><svg viewBox="0 0 126 164"><use href="#tabStar"/></svg><span class="num">i</span></div>
+        <div class="tab r"><svg viewBox="0 0 126 164"><use href="#tabFish"/></svg><span class="num">ii</span></div>
+      </div>
+      <p class="rule">Two pictures, one word.</p>
+    </div>
+    <div class="word">
+      <span class="blk">S</span><span class="blk">T</span><span class="blk">A</span><span class="blk">R</span><span class="blk h">F</span><span class="blk o cur"></span><span class="blk o"></span><span class="blk o"></span>
+    </div>
+    <div class="panel">
+      <div class="hintrow">
+        <button class="hint"><i></i>Reveal a letter</button>
+        <p class="note"><b>1</b> letter revealed<br><b>41%</b> solved it today</p>
+      </div>
+      <div class="kb">
+        <div class="row"><span class="k">Q</span><span class="k">W</span><span class="k">E</span><span class="k">R</span><span class="k">T</span><span class="k">Y</span><span class="k">U</span><span class="k">I</span><span class="k">O</span><span class="k">P</span></div>
+        <div class="row"><span class="k">A</span><span class="k">S</span><span class="k">D</span><span class="k">F</span><span class="k">G</span><span class="k">H</span><span class="k">J</span><span class="k">K</span><span class="k">L</span></div>
+        <div class="row"><span class="k w">Del</span><span class="k">Z</span><span class="k">X</span><span class="k">C</span><span class="k">V</span><span class="k">B</span><span class="k">N</span><span class="k">M</span><span class="k w go">Enter</span></div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<div class="board">
+  <header class="b-head">
+    <div>
+      <h1>03 · Pierre <small>Rébus · page Jeu · V2 · 2026-11-18 · refs Primal Instinct, Yogi Suria, Igloo</small></h1>
+      <p>Le rébus revient à son origine, le hiéroglyphe : deux tablettes de pierre gravées, en lumière rasante, dans la pénombre. Le « + » est une croix de lumière braise qui éclaire le bord des pierres. La réponse s'assemble en blocs gravés, et la lettre donnée s'allume de l'intérieur.</p>
+    </div>
+    <div class="swatches">
+      <div class="sw"><i style="background:#0f0d0b"></i>basalte #0f0d0b</div>
+      <div class="sw"><i style="background:#77716a"></i>pierre #77716a</div>
+      <div class="sw"><i style="background:#e9dfd2"></i>os #e9dfd2</div>
+      <div class="sw"><i style="background:#ff6a1a"></i>braise #ff6a1a</div>
+    </div>
+  </header>
+  <div class="frames">
+    <div>
+      <p class="cap">desktop · 1440 × 900 · post ouvert</p>
+      <div class="desk">
+        <div class="d-top"><i class="logo"></i><i class="search"></i><i class="av"></i></div>
+        <div class="d-body">
+          <div class="rail"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="post">
+            <div class="p-head"><i class="pav"></i><b>r/rebus_daily</b><span>· 3h</span></div>
+            <p class="p-title">Today's rebus — Wed, Nov 18</p>
+            <div class="slot-desk" data-slot></div>
+            <div class="p-act"><span>214 votes</span><span>86 comments</span><span>Share</span></div>
+          </div>
+          <div class="side"><i></i><i></i><i></i><i></i><i></i></div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <p class="cap">mobile · 390 × 844 · post ouvert</p>
+      <div class="mob">
+        <div class="m-status"><span>9:41</span><i></i></div>
+        <div class="m-bar"><i class="av"></i><i class="search"></i></div>
+        <div class="m-post">
+          <div class="p-head"><i class="pav"></i><b>r/rebus_daily</b><span>· 3h</span></div>
+          <p class="p-title">Today's rebus — Wed, Nov 18</p>
+          <div class="slot-mob" data-slot></div>
+          <div class="p-act"><span>214</span><span>86 comments</span><span>Share</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="strip">
+    <div class="state"><h3>état · vide</h3>
+      <div class="mini"><span class="blk o cur"></span><span class="blk o"></span><span class="blk o"></span><span class="blk o"></span><span class="blk o"></span><span class="blk o"></span><span class="blk o"></span><span class="blk o"></span></div>
+      <p class="st-note">Huit alvéoles creusées, la première rougeoie.</p></div>
+    <div class="state"><h3>état · saisie</h3>
+      <div class="mini"><span class="blk">S</span><span class="blk">T</span><span class="blk">A</span><span class="blk o cur"></span><span class="blk o"></span><span class="blk o"></span><span class="blk o"></span><span class="blk o"></span></div>
+      <p class="st-note">Chaque bloc s'enfonce dans son alvéole (90 ms, choc mat).</p></div>
+    <div class="state"><h3>état · lettre révélée</h3>
+      <div class="mini"><span class="blk">S</span><span class="blk">T</span><span class="blk">A</span><span class="blk">R</span><span class="blk h">F</span><span class="blk o cur"></span><span class="blk o"></span><span class="blk o"></span></div>
+      <p class="st-note">La gravure s'allume de l'intérieur, comme une braise.</p></div>
+    <div class="state"><h3>état · mauvaise réponse</h3>
+      <div class="mini x"><span class="blk">S</span><span class="blk">T</span><span class="blk">A</span><span class="blk">R</span><span class="blk">D</span><span class="blk">U</span><span class="blk">S</span><span class="blk">T</span></div>
+      <p class="tag">Not this one</p>
+      <p class="st-note">Les blocs s'éteignent et s'affaissent, avec un peu de poussière.</p></div>
+    <div class="state"><h3>état · trouvé</h3>
+      <div class="mini ok"><span class="blk">S</span><span class="blk">T</span><span class="blk">A</span><span class="blk">R</span><span class="blk h">F</span><span class="blk">I</span><span class="blk">S</span><span class="blk">H</span></div>
+      <p class="tag">Solved · 01:52 · 1 hint</p>
+      <p class="st-note">La croix de lumière descend sur le mot, et les huit gravures s'allument une à une.</p></div>
+  </div>
+</div>
+
+<script>
+  var tpl = document.getElementById('game');
+  document.querySelectorAll('[data-slot]').forEach(function (el) { el.appendChild(tpl.content.cloneNode(true)); });
+  function fit() {
+    var b = document.querySelector('.board');
+    var s = Math.min(1, window.innerWidth / b.offsetWidth);
+    b.style.transform = 'scale(' + s + ')';
+    document.body.style.height = (b.offsetHeight * s) + 'px';
+  }
+  window.addEventListener('resize', fit); fit();
+</script>
+</body>
+</html>

@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rébus — V2 · 01 Galerie</title>
+<style>
+/* ---------- planche ---------- */
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:#e9e6df;overflow-x:hidden}
+body{font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;color:#111}
+.board{width:2010px;padding:56px 64px 64px;transform-origin:0 0}
+.b-head{display:grid;grid-template-columns:1fr auto;align-items:end;gap:40px;margin-bottom:36px;border-bottom:1px solid #111;padding-bottom:20px}
+.b-head h1{font-size:44px;font-weight:800;letter-spacing:-.03em}
+.b-head h1 small{font-size:15px;font-weight:500;letter-spacing:.02em;color:#6b665c;margin-left:14px}
+.b-head p{font-size:15px;line-height:1.5;color:#3a372f;max-width:760px;margin-top:8px}
+.swatches{display:flex;gap:10px}
+.sw{width:118px;font-size:12px;color:#3a372f}
+.sw i{display:block;height:44px;border-radius:6px;border:1px solid rgba(0,0,0,.15);margin-bottom:6px}
+.frames{display:flex;gap:56px;align-items:flex-start}
+.cap{font-size:12px;letter-spacing:.08em;text-transform:lowercase;color:#6b665c;margin-bottom:10px}
+.strip{margin-top:44px;display:grid;grid-template-columns:repeat(5,1fr);gap:20px}
+.state{background:#faf7f0;border:1px solid #d9d4c8;border-radius:10px;padding:18px 18px 16px}
+.state h3{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:lowercase;color:#6b665c;margin-bottom:14px}
+
+/* ---------- cadre neutre (chrome du feed, volontairement gris) ---------- */
+.desk{width:1440px;height:900px;background:#f2f2f1;border-radius:10px;overflow:hidden;box-shadow:0 30px 60px -30px rgba(0,0,0,.35);position:relative}
+.d-top{height:56px;background:#fff;border-bottom:1px solid #e3e3e1;display:flex;align-items:center;padding:0 20px;gap:20px}
+.d-top .logo{width:96px;height:22px;border-radius:5px;background:#dcdcda}
+.d-top .search{flex:0 0 560px;height:38px;border-radius:19px;background:#ececea;margin:0 auto}
+.d-top .av{width:32px;height:32px;border-radius:50%;background:#dcdcda}
+.d-body{display:grid;grid-template-columns:272px 756px 316px;gap:24px;padding:20px 24px 0 24px;justify-content:center}
+.rail i{display:block;height:12px;border-radius:6px;background:#e1e1df;margin:14px 0 22px}
+.rail i:nth-child(2n){width:70%}.rail i:nth-child(3n){width:52%}
+.side{background:#fff;border-radius:12px;height:300px;padding:18px}
+.side i{display:block;height:10px;border-radius:5px;background:#e8e8e6;margin-bottom:14px}
+.side i:first-child{width:50%;height:14px}
+.post{background:#fff;border-radius:12px;padding:14px 16px 10px}
+.p-head{display:flex;align-items:center;gap:8px;font-size:12px;color:#55554f}
+.p-head .pav{width:24px;height:24px;border-radius:50%;background:#d6d6d3}
+.p-head b{color:#1f1f1c;font-weight:600}
+.p-title{font-size:19px;font-weight:600;color:#1f1f1c;margin:8px 0 12px;letter-spacing:-.005em}
+.p-act{display:flex;gap:8px;margin-top:10px}
+.p-act span{font-size:12px;font-weight:600;color:#3d3d39;background:#ececea;border-radius:16px;padding:7px 13px}
+.slot-desk{width:724px;height:568px;border-radius:12px;overflow:hidden}
+.mob{width:390px;height:844px;border-radius:46px;background:#fff;overflow:hidden;box-shadow:0 30px 60px -30px rgba(0,0,0,.35),0 0 0 10px #1b1b1b;position:relative}
+.m-status{height:46px;display:flex;justify-content:space-between;align-items:flex-end;padding:0 30px 6px;font-size:14px;font-weight:600}
+.m-status i{width:66px;height:12px;border-radius:6px;background:#1b1b1b;display:block;margin-bottom:3px}
+.m-bar{height:48px;display:flex;align-items:center;gap:12px;padding:0 14px;border-bottom:1px solid #ececea}
+.m-bar .search{flex:1;height:34px;border-radius:17px;background:#ececea}
+.m-bar .av{width:30px;height:30px;border-radius:50%;background:#dcdcda}
+.m-post{padding:12px 14px 0}
+.m-post .p-title{font-size:16px;margin:6px 0 10px}
+.slot-mob{width:390px;height:604px;margin-left:-14px;overflow:hidden}
+.m-post .p-act{margin-top:8px}
+
+html,body{background:#e4e1da}
+.state{background:#ecebe7;border-color:#d6d2c9}
+
+/* =========================================================
+   JEU — V2 · 01 « Galerie »
+   plâtre #ecebe7 · ombre #2a2622 · bleu relief #6a8fd8 · sol #d6d0c4
+   ========================================================= */
+.game{container-type:inline-size;position:relative;width:100%;height:100%;background:#ecebe7;color:#2a2622;overflow:hidden;display:flex;flex-direction:column}
+.scene{position:relative;height:340px;flex:none;overflow:hidden;
+  background:linear-gradient(180deg,#f3f2ee 0%,#ebe9e4 60%,#e2dfd8 69%)}
+/* faisceaux de lumière (verrières) */
+.beam{position:absolute;top:-20px;width:120px;height:280px;background:linear-gradient(180deg,rgba(255,255,255,.95),rgba(255,255,255,0));filter:blur(10px);transform:skewX(-24deg);opacity:.9}
+.beam.b1{left:6%}.beam.b2{left:38%;width:90px}.beam.b3{left:68%;width:110px}
+/* ombres de verrière au plafond */
+.sky{position:absolute;top:0;left:0;right:0;height:26px;display:flex;justify-content:space-around;padding:0 6%}
+.sky i{width:16%;height:100%;background:linear-gradient(180deg,#ffffff,#f6f5f2);box-shadow:0 8px 14px -6px rgba(60,50,40,.25);transform:skewX(-24deg)}
+/* sol */
+.floor{position:absolute;left:0;right:0;bottom:0;height:31%;
+  background:linear-gradient(180deg,#cfc8bb 0%,#d9d3c7 22%,#ddd7cc 100%);
+  box-shadow:inset 0 10px 18px -12px rgba(60,45,30,.45)}
+.floor::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 58px,rgba(120,100,80,.08) 58px 59px);transform:perspective(220px) rotateX(48deg);transform-origin:top}
+.vign{position:absolute;inset:0;background:radial-gradient(120% 90% at 50% 40%,transparent 55%,rgba(70,58,46,.22));pointer-events:none}
+.grain{position:absolute;inset:0;opacity:.35;mix-blend-mode:multiply;pointer-events:none}
+
+.hud{position:absolute;top:30px;left:18px;right:18px;display:flex;justify-content:space-between;align-items:baseline;z-index:3}
+.wm{font-size:22px;font-weight:900;letter-spacing:-.03em;color:#6a8fd8;display:inline-block;transform:scaleX(.88);transform-origin:left;
+  text-shadow:1px 1px 0 #5577c0,2px 2px 0 #4a68a8,3px 4px 6px rgba(30,40,70,.3)}
+.meta{font-size:11.5px;font-weight:600;color:#7c746a;display:flex;gap:10px}
+.meta b{color:#2a2622}
+
+.wall{position:absolute;top:92px;left:0;right:0;display:flex;justify-content:center;align-items:center;gap:22px;perspective:700px;z-index:2}
+.plaque{width:116px;height:116px;border-radius:5px;position:relative;
+  background:linear-gradient(140deg,#fbfaf7 0%,#eceae4 60%,#e2dfd8 100%);
+  box-shadow:inset 1px 1px 0 #fff,inset -1px -1px 0 rgba(0,0,0,.06),3px 4px 6px rgba(60,48,36,.18),22px 26px 30px -14px rgba(60,48,36,.42)}
+.plaque.l{transform:rotateY(14deg)}.plaque.r{transform:rotateY(-14deg)}
+.plaque svg{position:absolute;inset:12px;width:calc(100% - 24px);height:calc(100% - 24px)}
+.plaque .cap{position:absolute;bottom:-18px;left:2px;font-size:9.5px;letter-spacing:.12em;color:#9a9186;margin:0;text-transform:uppercase}
+.scrib{position:absolute;pointer-events:none;z-index:4}
+.scrib path{fill:none;stroke:#1d1a17;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+.scrib.plus{width:34px;height:34px;position:relative}
+.rule{position:absolute;top:62px;left:0;right:0;text-align:center;font-size:13px;font-weight:700;color:#2a2622;z-index:3;letter-spacing:.01em}
+
+.word{position:absolute;left:0;right:0;bottom:22px;display:flex;justify-content:center;align-items:flex-end;gap:4px;z-index:3}
+.L{position:relative;width:36px;height:56px;display:flex;align-items:flex-end;justify-content:center}
+.L b{position:relative;z-index:1;display:inline-block;font-size:52px;line-height:.8;font-weight:900;color:#6a8fd8;transform:scaleX(.82);
+  text-shadow:1px 1px 0 #5f84cd,2px 2px 0 #5779c2,3px 3px 0 #506fb6,4px 4px 0 #4966aa,5px 5px 0 #435e9e,6px 6px 0 #3d5692,8px 10px 12px rgba(30,40,70,.35)}
+.L::after{content:"";position:absolute;bottom:-6px;left:2px;right:-8px;height:10px;border-radius:50%;background:radial-gradient(closest-side,rgba(60,40,25,.45),transparent);z-index:0}
+.L.h b{color:#f7f5f0;text-shadow:1px 1px 0 #dcd8cf,2px 2px 0 #d3cec4,3px 3px 0 #cac4b9,4px 4px 0 #c1bbaf,5px 5px 0 #b8b1a5,6px 6px 0 #aea79b,8px 10px 12px rgba(30,40,70,.3)}
+.L.o b{visibility:hidden}
+.L.o::after{bottom:-2px;left:3px;right:3px;height:9px;background:#c7bfb2;box-shadow:inset 0 2px 3px rgba(60,40,25,.35),0 1px 0 rgba(255,255,255,.5)}
+.L.cur::after{background:#c3d1ef;box-shadow:inset 0 2px 3px rgba(40,60,110,.35),0 0 12px 2px rgba(106,143,216,.45);animation:pulse 1.2s ease-in-out infinite}
+@keyframes pulse{50%{box-shadow:inset 0 2px 3px rgba(40,60,110,.35),0 0 4px 0 rgba(106,143,216,.2)}}
+.ring{position:absolute;left:-6px;top:-8px;width:50px;height:68px;pointer-events:none}
+.ring path{fill:none;stroke:#1d1a17;stroke-width:2.4;stroke-linecap:round}
+
+.panel{flex:1;display:flex;flex-direction:column;padding:14px 16px 14px;background:linear-gradient(180deg,#e4e0d8,#ecebe7 30%)}
+.hintrow{display:flex;justify-content:space-between;align-items:center}
+.hint{font:inherit;font-size:13px;font-weight:800;color:#2a2622;background:#f6f5f1;border:0;border-radius:999px;padding:10px 16px;cursor:pointer;
+  box-shadow:inset 0 1px 0 #fff,0 2px 0 #cbc6bc,0 8px 14px -6px rgba(60,48,36,.35)}
+.hint i{font-style:normal;color:#6a8fd8;margin-right:6px}
+.note{font-size:12px;color:#7c746a;text-align:right;line-height:1.4}
+.note b{color:#2a2622}
+.kb{margin-top:auto;display:flex;flex-direction:column;gap:7px}
+.row{display:flex;gap:5px;justify-content:center}
+.k{flex:1;max-width:34px;height:44px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:#2a2622;
+  background:linear-gradient(180deg,#faf9f6,#efede8);box-shadow:inset 0 1px 0 #fff,0 2px 0 #cbc6bc,0 6px 10px -5px rgba(60,48,36,.35)}
+.k.w{max-width:58px;flex:1.6;font-size:12px}
+.k.go{background:linear-gradient(180deg,#7c9de0,#5f84cd);color:#fff;box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 2px 0 #465f98,0 8px 12px -5px rgba(60,90,160,.5)}
+@container (min-width:600px){
+  .scene{height:350px}
+  .wall{gap:34px;top:90px}
+  .plaque{width:136px;height:136px}
+  .rule{top:60px}
+  .L{width:42px;height:60px}.L b{font-size:58px}
+  .kb{width:470px;margin-left:auto;margin-right:auto}
+  .k{height:40px}
+  .panel{padding:14px 40px 16px}
+}
+
+/* états */
+.mini{display:flex;gap:2px;justify-content:center;align-items:flex-end;height:64px;position:relative;padding-bottom:6px;
+  background:linear-gradient(180deg,transparent 0 60%,#d9d3c7 60%);border-radius:6px}
+.mini .L{width:24px;height:40px}.mini .L b{font-size:36px}
+.mini .L::after{height:7px}
+.mini.x .L b{color:#cfc9be;text-shadow:1px 1px 0 #bdb6aa,2px 2px 0 #b3ab9e,3px 3px 0 #a9a194;transform:scaleX(.82) rotate(-8deg) translateY(4px)}
+.mini.x .L:nth-child(2n) b{transform:scaleX(.82) rotate(7deg) translateY(6px)}
+.st-note{font-size:12px;color:#6c655c;text-align:center;margin-top:12px;line-height:1.4}
+.tag{font-size:11px;font-weight:800;color:#6a8fd8;text-align:center;margin-top:8px}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <filter id="relief" x="-10%" y="-10%" width="120%" height="120%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="1.6" result="b"/>
+      <feDiffuseLighting in="b" surfaceScale="5" diffuseConstant="1.05" lighting-color="#ffffff" result="d"><feDistantLight azimuth="225" elevation="52"/></feDiffuseLighting>
+      <feComposite in="d" in2="SourceAlpha" operator="in" result="d2"/>
+      <feSpecularLighting in="b" surfaceScale="5" specularConstant=".55" specularExponent="22" lighting-color="#ffffff" result="s"><feDistantLight azimuth="225" elevation="38"/></feSpecularLighting>
+      <feComposite in="s" in2="SourceAlpha" operator="in" result="s2"/>
+      <feComposite in="d2" in2="s2" operator="arithmetic" k1="0" k2=".86" k3=".5" k4="0" result="lit"/>
+      <feDropShadow dx="3" dy="5" stdDeviation="3.5" flood-color="#3c3024" flood-opacity=".16"/>
+    </filter>
+    <filter id="grainf"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" stitchTiles="stitch"/><feColorMatrix values="0 0 0 0 .5  0 0 0 0 .45  0 0 0 0 .4  0 0 0 .35 0"/></filter>
+    <filter id="wob" x="-10%" y="-10%" width="120%" height="120%"><feTurbulence type="fractalNoise" baseFrequency=".04" numOctaves="2" seed="3"/><feDisplacementMap in="SourceGraphic" scale="3"/></filter>
+    <symbol id="star" viewBox="0 0 100 100">
+      <path d="M50 10 L61 39 L92 40 L67 59 L76 89 L50 71 L24 89 L33 59 L8 40 L39 39 Z" fill="#ecebe6" stroke="#ecebe6" stroke-width="6" stroke-linejoin="round" filter="url(#relief)"/>
+    </symbol>
+    <symbol id="fish" viewBox="0 0 100 100">
+      <g filter="url(#relief)" fill="#ecebe6">
+        <path d="M10 50 C24 25 58 23 72 50 C58 77 24 75 10 50 Z"/>
+        <path d="M68 50 L92 31 C88 44 88 56 92 69 Z" stroke="#ecebe6" stroke-width="4" stroke-linejoin="round"/>
+      </g>
+      <circle cx="25" cy="46" r="3.6" fill="#bdb6aa"/>
+      <path d="M38 37 C44 44 44 56 38 63" fill="none" stroke="#c9c2b6" stroke-width="2.4" stroke-linecap="round"/>
+    </symbol>
+  </defs>
+</svg>
+
+<template id="game">
+  <div class="game">
+    <div class="scene">
+      <div class="sky"><i></i><i></i><i></i></div>
+      <div class="beam b1"></div><div class="beam b2"></div><div class="beam b3"></div>
+      <div class="floor"></div>
+      <div class="hud"><span class="wm">Rébus</span><span class="meta"><span>Wed, Nov 18</span><span><b>7</b> day streak</span><span><b>01:24</b></span></span></div>
+      <div class="wall">
+        <div class="plaque l"><svg><use href="#star"/></svg><p class="cap">i.</p></div>
+        <svg class="scrib plus" viewBox="0 0 34 34"><g filter="url(#wob)"><path d="M17 5 C17.5 13 16.5 21 17 29 M5 17.5 C13 16 21 17.5 29 16.5"/></g></svg>
+        <div class="plaque r"><svg><use href="#fish"/></svg><p class="cap">ii.</p></div>
+      </div>
+      <p class="rule">Two pictures, one word.</p>
+      <div class="word">
+        <span class="L"><b>S</b></span><span class="L"><b>T</b></span><span class="L"><b>A</b></span><span class="L"><b>R</b></span>
+        <span class="L h"><b>F</b><svg class="ring" viewBox="0 0 60 80"><g filter="url(#wob)"><path d="M30 6 C8 6 4 30 6 48 C8 70 50 76 55 50 C60 26 48 8 24 10 C18 11 14 14 12 18"/></g></svg></span>
+        <span class="L o cur"><b>I</b></span><span class="L o"><b>S</b></span><span class="L o"><b>H</b></span>
+      </div>
+      <div class="vign"></div>
+      <svg class="grain" width="100%" height="100%"><rect width="100%" height="100%" filter="url(#grainf)"/></svg>
+    </div>
+    <div class="panel">
+      <div class="hintrow">
+        <button class="hint"><i>+</i>Reveal a letter</button>
+        <p class="note"><b>1</b> letter revealed<br><b>41%</b> solved it today</p>
+      </div>
+      <div class="kb">
+        <div class="row"><span class="k">Q</span><span class="k">W</span><span class="k">E</span><span class="k">R</span><span class="k">T</span><span class="k">Y</span><span class="k">U</span><span class="k">I</span><span class="k">O</span><span class="k">P</span></div>
+        <div class="row"><span class="k">A</span><span class="k">S</span><span class="k">D</span><span class="k">F</span><span class="k">G</span><span class="k">H</span><span class="k">J</span><span class="k">K</span><span class="k">L</span></div>
+        <div class="row"><span class="k w">Del</span><span class="k">Z</span><span class="k">X</span><span class="k">C</span><span class="k">V</span><span class="k">B</span><span class="k">N</span><span class="k">M</span><span class="k w go">Enter</span></div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<div class="board">
+  <header class="b-head">
+    <div>
+      <h1>01 · Galerie <small>Rébus · page Jeu · V2 · 2026-11-18 · refs Gapsy, Shutabug, Raben Rifaie</small></h1>
+      <p>Le rébus du jour est exposé : deux plaques de plâtre en relief, éclairées par des verrières, et la réponse se construit en lettres bleues extrudées posées au sol. Les emplacements vides sont de petites empreintes dans le sol. Un trait de marqueur noir, fait à la main, passe par-dessus la matière : le « + » et le cercle autour de l'indice.</p>
+    </div>
+    <div class="swatches">
+      <div class="sw"><i style="background:#ecebe7"></i>plâtre #ecebe7</div>
+      <div class="sw"><i style="background:#d6d0c4"></i>sol #d6d0c4</div>
+      <div class="sw"><i style="background:#6a8fd8"></i>bleu #6a8fd8</div>
+      <div class="sw"><i style="background:#2a2622"></i>marqueur #2a2622</div>
+    </div>
+  </header>
+  <div class="frames">
+    <div>
+      <p class="cap">desktop · 1440 × 900 · post ouvert</p>
+      <div class="desk">
+        <div class="d-top"><i class="logo"></i><i class="search"></i><i class="av"></i></div>
+        <div class="d-body">
+          <div class="rail"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="post">
+            <div class="p-head"><i class="pav"></i><b>r/rebus_daily</b><span>· 3h</span></div>
+            <p class="p-title">Today's rebus — Wed, Nov 18</p>
+            <div class="slot-desk" data-slot></div>
+            <div class="p-act"><span>214 votes</span><span>86 comments</span><span>Share</span></div>
+          </div>
+          <div class="side"><i></i><i></i><i></i><i></i><i></i></div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <p class="cap">mobile · 390 × 844 · post ouvert</p>
+      <div class="mob">
+        <div class="m-status"><span>9:41</span><i></i></div>
+        <div class="m-bar"><i class="av"></i><i class="search"></i></div>
+        <div class="m-post">
+          <div class="p-head"><i class="pav"></i><b>r/rebus_daily</b><span>· 3h</span></div>
+          <p class="p-title">Today's rebus — Wed, Nov 18</p>
+          <div class="slot-mob" data-slot></div>
+          <div class="p-act"><span>214</span><span>86 comments</span><span>Share</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="strip">
+    <div class="state"><h3>état · vide</h3>
+      <div class="mini"><span class="L o cur"><b>S</b></span><span class="L o"><b>T</b></span><span class="L o"><b>A</b></span><span class="L o"><b>R</b></span><span class="L o"><b>F</b></span><span class="L o"><b>I</b></span><span class="L o"><b>S</b></span><span class="L o"><b>H</b></span></div>
+      <p class="st-note">Huit empreintes dans le sol, la première s’allume en bleu.</p></div>
+    <div class="state"><h3>état · saisie</h3>
+      <div class="mini"><span class="L"><b>S</b></span><span class="L"><b>T</b></span><span class="L"><b>A</b></span><span class="L o cur"><b>R</b></span><span class="L o"><b>F</b></span><span class="L o"><b>I</b></span><span class="L o"><b>S</b></span><span class="L o"><b>H</b></span></div>
+      <p class="st-note">Chaque lettre tombe dans son empreinte (rebond 180 ms, petit bruit sourd).</p></div>
+    <div class="state"><h3>état · lettre révélée</h3>
+      <div class="mini"><span class="L"><b>S</b></span><span class="L"><b>T</b></span><span class="L"><b>A</b></span><span class="L"><b>R</b></span><span class="L h"><b>F</b></span><span class="L o cur"><b>I</b></span><span class="L o"><b>S</b></span><span class="L o"><b>H</b></span></div>
+      <p class="st-note">L'indice arrive en plâtre blanc, une autre matière, entouré au marqueur.</p></div>
+    <div class="state"><h3>état · mauvaise réponse</h3>
+      <div class="mini x"><span class="L"><b>S</b></span><span class="L"><b>T</b></span><span class="L"><b>A</b></span><span class="L"><b>R</b></span><span class="L"><b>D</b></span><span class="L"><b>U</b></span><span class="L"><b>S</b></span><span class="L"><b>T</b></span></div>
+      <p class="tag">Not this one</p>
+      <p class="st-note">Les lettres pâlissent et basculent comme des dominos, puis le sol se vide.</p></div>
+    <div class="state"><h3>état · trouvé</h3>
+      <div class="mini"><span class="L"><b>S</b></span><span class="L"><b>T</b></span><span class="L"><b>A</b></span><span class="L"><b>R</b></span><span class="L h"><b>F</b></span><span class="L"><b>I</b></span><span class="L"><b>S</b></span><span class="L"><b>H</b></span></div>
+      <p class="tag">Solved · 01:52 · 1 hint</p>
+      <p class="st-note">Le faisceau central glisse sur le mot de gauche à droite (0,8 s) : le déclic.</p></div>
+  </div>
+</div>
+
+<script>
+  var tpl = document.getElementById('game');
+  document.querySelectorAll('[data-slot]').forEach(function (el) { el.appendChild(tpl.content.cloneNode(true)); });
+  function fit() {
+    var b = document.querySelector('.board');
+    var s = Math.min(1, window.innerWidth / b.offsetWidth);
+    b.style.transform = 'scale(' + s + ')';
+    document.body.style.height = (b.offsetHeight * s) + 'px';
+  }
+  window.addEventListener('resize', fit); fit();
+</script>
+</body>
+</html>
