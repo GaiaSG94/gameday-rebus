@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rébus — V2 · 02 Gribouille</title>
+<style>
+/* ---------- planche ---------- */
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:#e9e6df;overflow-x:hidden}
+body{font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;color:#111}
+.board{width:2010px;padding:56px 64px 64px;transform-origin:0 0}
+.b-head{display:grid;grid-template-columns:1fr auto;align-items:end;gap:40px;margin-bottom:36px;border-bottom:1px solid #111;padding-bottom:20px}
+.b-head h1{font-size:44px;font-weight:800;letter-spacing:-.03em}
+.b-head h1 small{font-size:15px;font-weight:500;letter-spacing:.02em;color:#6b665c;margin-left:14px}
+.b-head p{font-size:15px;line-height:1.5;color:#3a372f;max-width:760px;margin-top:8px}
+.swatches{display:flex;gap:10px}
+.sw{width:118px;font-size:12px;color:#3a372f}
+.sw i{display:block;height:44px;border-radius:6px;border:1px solid rgba(0,0,0,.15);margin-bottom:6px}
+.frames{display:flex;gap:56px;align-items:flex-start}
+.cap{font-size:12px;letter-spacing:.08em;text-transform:lowercase;color:#6b665c;margin-bottom:10px}
+.strip{margin-top:44px;display:grid;grid-template-columns:repeat(5,1fr);gap:20px}
+.state{background:#faf7f0;border:1px solid #d9d4c8;border-radius:10px;padding:18px 18px 16px}
+.state h3{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:lowercase;color:#6b665c;margin-bottom:14px}
+
+/* ---------- cadre neutre (chrome du feed, volontairement gris) ---------- */
+.desk{width:1440px;height:900px;background:#f2f2f1;border-radius:10px;overflow:hidden;box-shadow:0 30px 60px -30px rgba(0,0,0,.35);position:relative}
+.d-top{height:56px;background:#fff;border-bottom:1px solid #e3e3e1;display:flex;align-items:center;padding:0 20px;gap:20px}
+.d-top .logo{width:96px;height:22px;border-radius:5px;background:#dcdcda}
+.d-top .search{flex:0 0 560px;height:38px;border-radius:19px;background:#ececea;margin:0 auto}
+.d-top .av{width:32px;height:32px;border-radius:50%;background:#dcdcda}
+.d-body{display:grid;grid-template-columns:272px 756px 316px;gap:24px;padding:20px 24px 0 24px;justify-content:center}
+.rail i{display:block;height:12px;border-radius:6px;background:#e1e1df;margin:14px 0 22px}
+.rail i:nth-child(2n){width:70%}.rail i:nth-child(3n){width:52%}
+.side{background:#fff;border-radius:12px;height:300px;padding:18px}
+.side i{display:block;height:10px;border-radius:5px;background:#e8e8e6;margin-bottom:14px}
+.side i:first-child{width:50%;height:14px}
+.post{background:#fff;border-radius:12px;padding:14px 16px 10px}
+.p-head{display:flex;align-items:center;gap:8px;font-size:12px;color:#55554f}
+.p-head .pav{width:24px;height:24px;border-radius:50%;background:#d6d6d3}
+.p-head b{color:#1f1f1c;font-weight:600}
+.p-title{font-size:19px;font-weight:600;color:#1f1f1c;margin:8px 0 12px;letter-spacing:-.005em}
+.p-act{display:flex;gap:8px;margin-top:10px}
+.p-act span{font-size:12px;font-weight:600;color:#3d3d39;background:#ececea;border-radius:16px;padding:7px 13px}
+.slot-desk{width:724px;height:568px;border-radius:12px;overflow:hidden}
+.mob{width:390px;height:844px;border-radius:46px;background:#fff;overflow:hidden;box-shadow:0 30px 60px -30px rgba(0,0,0,.35),0 0 0 10px #1b1b1b;position:relative}
+.m-status{height:46px;display:flex;justify-content:space-between;align-items:flex-end;padding:0 30px 6px;font-size:14px;font-weight:600}
+.m-status i{width:66px;height:12px;border-radius:6px;background:#1b1b1b;display:block;margin-bottom:3px}
+.m-bar{height:48px;display:flex;align-items:center;gap:12px;padding:0 14px;border-bottom:1px solid #ececea}
+.m-bar .search{flex:1;height:34px;border-radius:17px;background:#ececea}
+.m-bar .av{width:30px;height:30px;border-radius:50%;background:#dcdcda}
+.m-post{padding:12px 14px 0}
+.m-post .p-title{font-size:16px;margin:6px 0 10px}
+.slot-mob{width:390px;height:604px;margin-left:-14px;overflow:hidden}
+.m-post .p-act{margin-top:8px}
+
+html,body{background:#e7e4dc}
+.state{background:#f2f0e9;border:2.5px solid #111;border-radius:14px}
+
+/* =========================================================
+   JEU — V2 · 02 « Gribouille »
+   papier #f2f0e9 · encre #111111 · surligneur #ffe14d
+   ========================================================= */
+.game{container-type:inline-size;position:relative;width:100%;height:100%;background:#f2f0e9;color:#111;overflow:hidden;padding:8px}
+.card{position:relative;height:100%;border:3px solid #111;border-radius:20px;overflow:hidden;display:flex;flex-direction:column;background:#f7f5ef}
+.scene{position:relative;height:300px;flex:none}
+.hud{position:absolute;top:12px;left:14px;right:14px;display:flex;justify-content:space-between;align-items:center;z-index:3}
+.wm{font-size:24px;font-weight:900;letter-spacing:-.04em;display:inline-block;transform:scaleX(.86);transform-origin:left}
+.meta{font-size:11.5px;font-weight:700;display:flex;gap:6px}
+.meta span{border:1.8px solid #111;border-radius:999px;padding:3px 9px;background:#fff}
+.art{position:absolute;inset:0;width:100%;height:100%}
+.pen{fill:none;stroke:#111;stroke-linecap:round;stroke-linejoin:round}
+.big{position:absolute;top:44px;left:0;right:0;display:flex;justify-content:center;align-items:center;gap:0}
+.big svg{width:150px;height:150px;overflow:visible}
+.big .plus{width:60px;height:60px}
+.crowd{position:absolute;inset:0;pointer-events:none}
+.p{position:absolute;width:19px;height:34px}
+.bub{position:absolute;font-size:10px;font-weight:700;background:#fff;border:1.5px solid #111;border-radius:10px;padding:2px 7px;white-space:nowrap}
+.bub::after{content:"";position:absolute;bottom:-6px;left:9px;width:8px;height:8px;background:#fff;border-right:1.5px solid #111;border-bottom:1.5px solid #111;transform:rotate(45deg) skew(10deg,10deg)}
+.rule{position:absolute;left:0;right:0;bottom:12px;text-align:center;font-size:14px;font-weight:800;z-index:2}
+.rule span{background:#f7f5ef;padding:0 8px}
+
+.word{display:flex;justify-content:center;gap:5px;padding:4px 0 0}
+.c{position:relative;width:34px;height:54px;display:flex;align-items:flex-end;justify-content:center;font-size:52px;font-weight:900;line-height:.82;letter-spacing:-.02em}
+.c b{display:inline-block;transform:scaleX(.84);position:relative;z-index:1}
+.c::after{content:"";position:absolute;left:1px;right:1px;bottom:-6px;height:4px;border-radius:3px;background:#111}
+.c.e::after{background:#c8c3b6}
+.c.cur::after{animation:blink 1s steps(2) infinite}
+@keyframes blink{50%{opacity:.15}}
+.c.h::before{content:"";position:absolute;left:-6px;right:-6px;top:10px;bottom:-2px;background:#ffe14d;border-radius:3px 9px 4px 10px;transform:rotate(-3deg) skewX(-6deg);z-index:0}
+
+.panel{flex:1;display:flex;flex-direction:column;padding:16px 12px 12px}
+.hintrow{display:flex;justify-content:space-between;align-items:center}
+.btn{font:inherit;font-size:13px;font-weight:800;color:#111;background:#fff;border:2.2px solid #111;border-radius:999px;padding:8px 15px;box-shadow:0 3px 0 #111;cursor:pointer}
+.btn mark{background:#ffe14d;padding:0 3px;border-radius:3px}
+.note{font-size:12px;font-weight:600;text-align:right;line-height:1.35;color:#4a4740}
+.note b{color:#111}
+.kb{margin-top:auto;display:flex;flex-direction:column;gap:7px}
+.row{display:flex;gap:5px;justify-content:center}
+.k{flex:1;max-width:33px;height:42px;border:2px solid #111;border-radius:9px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;box-shadow:0 3px 0 #111}
+.k.w{max-width:56px;flex:1.6;font-size:12px}
+.k.go{background:#111;color:#fff}
+@container (min-width:600px){
+  .scene{height:262px}
+  .big{top:40px}
+  .big svg{width:150px;height:150px}
+  .big .plus{width:70px;height:70px}
+  .c{width:42px;height:60px;font-size:60px}
+  .kb{width:460px;margin-left:auto;margin-right:auto}
+  .k{height:35px}
+  .kb{gap:6px}
+  .panel{padding:12px 36px 12px}
+  .hintrow{margin-bottom:10px}
+}
+
+/* états */
+.mini{display:flex;gap:3px;justify-content:center;padding:6px 0 10px}
+.mini .c{width:22px;height:36px;font-size:34px}
+.mini .c::after{height:3px;bottom:-5px}
+.mini.x .c b{text-decoration:line-through;text-decoration-thickness:3px;color:#9a958a}
+.mini.ok{background:#ffe14d;border-radius:6px 14px 5px 12px;transform:rotate(-1.5deg);margin:0 10px}
+.st-note{font-size:12px;color:#4a4740;text-align:center;margin-top:12px;line-height:1.4}
+.tag{font-size:11px;font-weight:800;text-align:center;margin-top:6px}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="star" viewBox="0 0 100 100">
+      <path class="pen" stroke-width="2.6" d="M50 7 L61.5 38 L94 39 L68 58.5 L77.5 91 L50 72 L22.5 91 L32 58.5 L6 39 L38.5 38 Z"/>
+      <path class="pen" stroke-width="1.2" d="M50 18 L50 66 M57 43 L82 43 M43 43 L18 43 M60 60 L71 83 M40 60 L29 83"/>
+      <path class="pen" stroke-width="1" d="M64 48 l6 -3 M66 52 l7 -3 M62 66 l4 6 M66 64 l3 6 M34 66 l-4 6"/>
+      <path class="pen" stroke-width="1.6" d="M88 12 l4 -4 M92 18 l6 -1 M82 8 l1 -6"/>
+    </symbol>
+    <symbol id="fish" viewBox="0 0 100 100">
+      <path class="pen" stroke-width="2.6" d="M8 50 C20 26 54 22 72 48 C56 76 22 74 8 50 Z"/>
+      <path class="pen" stroke-width="2.6" d="M70 48 C78 40 86 33 95 29 C91 42 91 56 95 70 C86 64 78 57 70 51"/>
+      <path class="pen" stroke-width="2" d="M34 36 C40 43 40 57 34 63"/>
+      <circle cx="21" cy="46" r="3.2" fill="#111"/>
+      <path class="pen" stroke-width="1.1" d="M44 40 q4 4 0 8 M50 38 q4 4 0 8 M56 40 q4 4 0 8 M44 52 q4 4 0 8 M50 54 q4 4 0 8 M56 52 q4 3 1 7 M62 46 q3 3 0 6"/>
+      <path class="pen" stroke-width="2" d="M38 30 C44 20 54 18 60 26 M40 70 C46 78 52 78 56 72"/>
+      <path class="pen" stroke-width="1.4" d="M10 50 l-6 -2 M12 56 l-5 3"/>
+    </symbol>
+    <symbol id="plus" viewBox="0 0 60 60">
+      <path d="M24 6 L36 6 L36 24 L54 24 L54 36 L36 36 L36 54 L24 54 L24 36 L6 36 L6 24 L24 24 Z" fill="#111" stroke="#111" stroke-width="3" stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="guy" viewBox="0 0 15 27">
+      <circle cx="7.5" cy="5.5" r="4.6" fill="#fff" stroke="#111" stroke-width="1.3"/>
+      <circle cx="6" cy="5.3" r=".7" fill="#111"/><circle cx="9" cy="5.3" r=".7" fill="#111"/>
+      <path d="M3 11.5 Q7.5 9.5 12 11.5 L12 20 Q7.5 21.5 3 20 Z" fill="#fff" stroke="#111" stroke-width="1.3" stroke-linejoin="round"/>
+      <path d="M5.5 21 L5 26 M9.5 21 L10 26" stroke="#111" stroke-width="1.3" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="cheer" viewBox="0 0 15 27">
+      <circle cx="7.5" cy="5.5" r="4.6" fill="#fff" stroke="#111" stroke-width="1.3"/>
+      <path d="M5.5 6.6 Q7.5 8.4 9.5 6.6" fill="none" stroke="#111" stroke-width="1"/>
+      <path d="M3 11.5 Q7.5 9.5 12 11.5 L12 20 Q7.5 21.5 3 20 Z" fill="#fff" stroke="#111" stroke-width="1.3" stroke-linejoin="round"/>
+      <path d="M3.5 12 L0.8 7 M11.5 12 L14.2 7 M5.5 21 L5 26 M9.5 21 L10 26" stroke="#111" stroke-width="1.3" stroke-linecap="round"/>
+    </symbol>
+  </defs>
+</svg>
+
+<template id="game">
+  <div class="game"><div class="card">
+    <div class="scene">
+      <div class="hud"><span class="wm">rébus</span><span class="meta"><span>Wed, Nov 18</span><span>7 day streak</span><span>01:24</span></span></div>
+      <div class="big">
+        <svg style="transform:rotate(-6deg)"><use href="#star"/></svg>
+        <svg class="plus"><use href="#plus"/></svg>
+        <svg style="transform:rotate(4deg)"><use href="#fish"/></svg>
+      </div>
+      <div class="crowd">
+        <svg class="p" style="left:6%;top:62%"><use href="#guy"/></svg>
+        <svg class="p" style="left:11%;top:70%;transform:scale(.85)"><use href="#guy"/></svg>
+        <svg class="p" style="left:17%;top:64%"><use href="#cheer"/></svg>
+        <span class="bub" style="left:13%;top:51%">got it</span>
+        <svg class="p" style="left:30%;top:72%;transform:scale(.8)"><use href="#guy"/></svg>
+        <svg class="p" style="left:44%;top:73%;transform:scale(.75)"><use href="#guy"/></svg>
+        <svg class="p" style="left:60%;top:72%;transform:scale(.8) scaleX(-1)"><use href="#guy"/></svg>
+        <span class="bub" style="left:57%;top:61%">hmm</span>
+        <svg class="p" style="left:76%;top:66%;transform:scaleX(-1)"><use href="#guy"/></svg>
+        <svg class="p" style="left:83%;top:62%"><use href="#cheer"/></svg>
+        <svg class="p" style="left:89%;top:70%;transform:scale(.85) scaleX(-1)"><use href="#guy"/></svg>
+        <span class="bub" style="left:78%;top:50%">oh!</span>
+        <svg class="p" style="left:4%;top:18%;transform:scale(.7)"><use href="#guy"/></svg>
+        <svg class="p" style="left:92%;top:24%;transform:scale(.7) scaleX(-1)"><use href="#guy"/></svg>
+      </div>
+      <p class="rule"><span>Two pictures, one word.</span></p>
+    </div>
+    <div class="word">
+      <span class="c"><b>S</b></span><span class="c"><b>T</b></span><span class="c"><b>A</b></span><span class="c"><b>R</b></span><span class="c h"><b>F</b></span><span class="c e cur"></span><span class="c e"></span><span class="c e"></span>
+    </div>
+    <div class="panel">
+      <div class="hintrow">
+        <button class="btn"><mark>+</mark> Reveal a letter</button>
+        <p class="note"><b>1</b> letter revealed<br><b>2,318</b> players · <b>41%</b> got it</p>
+      </div>
+      <div class="kb">
+        <div class="row"><span class="k">Q</span><span class="k">W</span><span class="k">E</span><span class="k">R</span><span class="k">T</span><span class="k">Y</span><span class="k">U</span><span class="k">I</span><span class="k">O</span><span class="k">P</span></div>
+        <div class="row"><span class="k">A</span><span class="k">S</span><span class="k">D</span><span class="k">F</span><span class="k">G</span><span class="k">H</span><span class="k">J</span><span class="k">K</span><span class="k">L</span></div>
+        <div class="row"><span class="k w">Del</span><span class="k">Z</span><span class="k">X</span><span class="k">C</span><span class="k">V</span><span class="k">B</span><span class="k">N</span><span class="k">M</span><span class="k w go">Enter</span></div>
+      </div>
+    </div>
+  </div></div>
+</template>
+
+<div class="board">
+  <header class="b-head">
+    <div>
+      <h1>02 · Gribouille <small>Rébus · page Jeu · V2 · 2026-11-18 · refs Don't Look Up (game), Gemeos</small></h1>
+      <p>Un monde dessiné à la plume : les pictos sont de grands dessins hachurés, et autour d'eux une petite foule de joueurs du jour réagit en bulles. La réponse s'écrit en noir massif, et l'indice est passé au surligneur jaune, seule couleur de l'écran. Les boutons ont un vrai poids : contour épais et ombre pleine qui s'écrase au clic.</p>
+    </div>
+    <div class="swatches">
+      <div class="sw"><i style="background:#f2f0e9"></i>papier #f2f0e9</div>
+      <div class="sw"><i style="background:#111111"></i>encre #111111</div>
+      <div class="sw"><i style="background:#ffe14d"></i>surligneur #ffe14d</div>
+      <div class="sw"><i style="background:#c8c3b6"></i>trait vide #c8c3b6</div>
+    </div>
+  </header>
+  <div class="frames">
+    <div>
+      <p class="cap">desktop · 1440 × 900 · post ouvert</p>
+      <div class="desk">
+        <div class="d-top"><i class="logo"></i><i class="search"></i><i class="av"></i></div>
+        <div class="d-body">
+          <div class="rail"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="post">
+            <div class="p-head"><i class="pav"></i><b>r/rebus_daily</b><span>· 3h</span></div>
+            <p class="p-title">Today's rebus — Wed, Nov 18</p>
+            <div class="slot-desk" data-slot></div>
+            <div class="p-act"><span>214 votes</span><span>86 comments</span><span>Share</span></div>
+          </div>
+          <div class="side"><i></i><i></i><i></i><i></i><i></i></div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <p class="cap">mobile · 390 × 844 · post ouvert</p>
+      <div class="mob">
+        <div class="m-status"><span>9:41</span><i></i></div>
+        <div class="m-bar"><i class="av"></i><i class="search"></i></div>
+        <div class="m-post">
+          <div class="p-head"><i class="pav"></i><b>r/rebus_daily</b><span>· 3h</span></div>
+          <p class="p-title">Today's rebus — Wed, Nov 18</p>
+          <div class="slot-mob" data-slot></div>
+          <div class="p-act"><span>214</span><span>86 comments</span><span>Share</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="strip">
+    <div class="state"><h3>état · vide</h3>
+      <div class="mini"><span class="c e cur"></span><span class="c e"></span><span class="c e"></span><span class="c e"></span><span class="c e"></span><span class="c e"></span><span class="c e"></span><span class="c e"></span></div>
+      <p class="st-note">La foule attend, bras ballants. Le premier trait clignote.</p></div>
+    <div class="state"><h3>état · saisie</h3>
+      <div class="mini"><span class="c"><b>S</b></span><span class="c"><b>T</b></span><span class="c"><b>A</b></span><span class="c e cur"></span><span class="c e"></span><span class="c e"></span><span class="c e"></span><span class="c e"></span></div>
+      <p class="st-note">Chaque lettre « tamponne » (écrasement 120 ms).</p></div>
+    <div class="state"><h3>état · lettre révélée</h3>
+      <div class="mini"><span class="c"><b>S</b></span><span class="c"><b>T</b></span><span class="c"><b>A</b></span><span class="c"><b>R</b></span><span class="c h"><b>F</b></span><span class="c e cur"></span><span class="c e"></span><span class="c e"></span></div>
+      <p class="st-note">Le surligneur passe d'un geste (tracé 250 ms) sous la lettre donnée.</p></div>
+    <div class="state"><h3>état · mauvaise réponse</h3>
+      <div class="mini x"><span class="c"><b>S</b></span><span class="c"><b>T</b></span><span class="c"><b>A</b></span><span class="c"><b>R</b></span><span class="c"><b>D</b></span><span class="c"><b>U</b></span><span class="c"><b>S</b></span><span class="c"><b>T</b></span></div>
+      <p class="tag">Not this one</p>
+      <p class="st-note">Rayé à la plume, et la foule fait « hmm » en chœur.</p></div>
+    <div class="state"><h3>état · trouvé</h3>
+      <div class="mini ok"><span class="c"><b>S</b></span><span class="c"><b>T</b></span><span class="c"><b>A</b></span><span class="c"><b>R</b></span><span class="c"><b>F</b></span><span class="c"><b>I</b></span><span class="c"><b>S</b></span><span class="c"><b>H</b></span></div>
+      <p class="tag">Solved · 01:52 · 1 hint</p>
+      <p class="st-note">Tout le mot est surligné et la foule lève les bras : le déclic.</p></div>
+  </div>
+</div>
+
+<script>
+  var tpl = document.getElementById('game');
+  document.querySelectorAll('[data-slot]').forEach(function (el) { el.appendChild(tpl.content.cloneNode(true)); });
+  function fit() {
+    var b = document.querySelector('.board');
+    var s = Math.min(1, window.innerWidth / b.offsetWidth);
+    b.style.transform = 'scale(' + s + ')';
+    document.body.style.height = (b.offsetHeight * s) + 'px';
+  }
+  window.addEventListener('resize', fit); fit();
+</script>
+</body>
+</html>
